@@ -1,105 +1,165 @@
-class Game {
-  constructor(){
+class Game {	
+	constructor(){
+	
+	}
+	
+	getState(){
+		var gameStateRef  = database.ref('gameState');
+		gameStateRef.on("value",function(data){
+		gameState = data.val();
+	})
+	
+	}
+	
+	update(state){
+		database.ref('/').update({
+		gameState: state
+	});
+	}
+	
+	async start(){
+		if(gameState === 0){
+			player = new Player();
+			var playerCountRef = await database.ref('playerCount').once("value");
+			
+			if(playerCountRef.exists()){
+				playerCount = playerCountRef.val();
+				player.getCount();
+			}
 
-  }
+			form = new Form()
+			form.display();
+		}	
 
-  getState(){
-    var gameStateRef  = database.ref('gameState');
-    gameStateRef.on("value",function(data){
-       gameState = data.val();
-    })
+		for(var i=0;i<displayWidth*4;i+=170){
+			var w1 = createSprite(i,437,150,10);
+			w1.shapeColor ="white";
+		}
+	
+		for(var i=0;i<displayWidth*4;i+=170){
+			var w2 = createSprite(i,637,150,10);
+			w2.shapeColor ="white";
+		}
+	
+		for(var i=0;i<displayWidth*4;i+=170){
+			var w3 = createSprite(i,837,150,10);
+			w3.shapeColor ="white";
+		}
+	
+		for(var i=0;i<displayWidth*4;i+=170){
+			var w4 = createSprite(i,1037,150,10);
+			w4.shapeColor ="white";
+		}
 
-  }
+		for(var i=0;i<displayWidth*4;i+=250){
+			h1 = createSprite(i,417);
+			h1.addImage("hurdleRow1",hurdle);
+			h1.scale =0.8;
+			h1.setCollider("rectangle",10,0,60,60);
+		}
+	
+		for(var i=0;i<displayWidth*4;i+=250){
+			h2 = createSprite(i,617);
+			h2.addImage("hurdleRow2",hurdle);
+			h2.scale =0.8;
+			h2.setCollider("rectangle",10,0,60,60);
+		}
+	
+		for(var i=0;i<displayWidth*4;i+=250){
+			h3 = createSprite(i,817);
+			h3.addImage("hurdleRow3",hurdle);
+			h3.scale =0.8;
+			h3.setCollider("rectangle",10,0,60,60);
+		}
 
-  update(state){
-    database.ref('/').update({
-      gameState: state
-    });
-  }
+		for(var i=0;i<displayWidth*4;i+=250){
+			h4 = createSprite(i,1017);
+			h4.addImage("hurdleRow4",hurdle);
+			h4.scale =0.8;
+			h4.setCollider("rectangle",10,0,60,60);
+		}
+	
+		car1 = createSprite(10,300,10,10);
+		car1.addAnimation("car1",pl1);
+		car1.scale = 1;
+		car1.setCollider("rectangle",-10,0,40,80);
+		
+		car2 = createSprite(10,500,10,10);
+		car2.addAnimation("car2",pl2);
+		car2.scale = 0.2;
+		car2.setCollider("rectangle",-20,0,200,340);
 
-  async start(){
-    if(gameState === 0){
-      player = new Player();
-      var playerCountRef = await database.ref('playerCount').once("value");
-      if(playerCountRef.exists()){
-        playerCount = playerCountRef.val();
-        player.getCount();
-      }
-      form = new Form()
-      form.display();
-    }
+		car3 = createSprite(10,700,10,10);
+		car3.addAnimation("car3",pl3);
+		car3.scale = 0.03;
+		car3.setCollider("rectangle",-30,-30,2000,2500);
 
-    car1 = createSprite(100,200);
-    car1.addImage("car1",car1_img);
+		car4 = createSprite(10,900,10,10);
+		car4.addAnimation("car4",pl4);
+		car4.scale = 0.15;
+		car4.setCollider("rectangle",0,0,300,500);
 
-    car2 = createSprite(300,200);
-    car2.addImage("car2",car2_img);
+		cars = [car1, car2, car3, car4];
+	}
+	
+	play(){
+		form.hide();
+		
+		Player.getPlayerInfo();
+		
+		if(allPlayers !== undefined){
+			background("#80A0BE");
+			image(track,0,300,displayWidth*4.2, 1000);
+			
+			var index = 0;
+			
+			//x and y position of the cars
+			var y = 200 ;
+			var x = 0;
+			
+			for(var plr in allPlayers){
+			index = index + 1 ;
+			
+			//position the cars a little away from each other in x direction
+			y = y + 200;
+			//use data form the database to display the cars in y direction
+			x = displayHeight - allPlayers[plr].distance;
+			cars[index-1].x = x;
+			cars[index-1].y = y;
+			
+			if (index === player.index){
+				cars[index - 1].shapeColor = "red";
+				camera.position.x = cars[index-1].x+500;
+				camera.position.y = displayWidth/2;
+				if(keyIsDown(UP_ARROW)){
+					cars[index-1].y =y-60;
+					player.update();
+				}
+			}
+		
+		}
+	
+	}
+	
 
-    car3 = createSprite(500,200);
-    car3.addImage("car3",car3_img);
+	if(keyIsDown(RIGHT_ARROW)){
+		player.distance -=10
+		player.update();
+		console.log(player.index);
+	}
+	
 
-    car4 = createSprite(700,200);
-    car4.addImage("car4",car4_img);
-
-    cars = [car1, car2, car3, car4];
-  }
-
-  play(){
-    form.hide();
-
-    Player.getPlayerInfo();
-    
-    if(allPlayers !== undefined){
-      background(rgb(198,135,103));
-      //background("#C68767");
-
-      image(track,0,-displayHeight*4,displayWidth,displayHeight*6)
-      //var display_position = 100;
-      
-      //index of the array
-      var index = 0;
-
-      //x and y position of the cars
-      var x = 175;
-      var y;
-
-      for(var plr in allPlayers){
-        //add 1 to the index for every loop
-        index = index + 1 ;
-
-        //position the cars a little away from each other in x direction
-        x = x + 250;
-        //use data form the database to display the cars in y direction
-        y = displayHeight - allPlayers[plr].distance;
-        cars[index-1].x = x;
-        cars[index-1].y = y;
-
-        if (index === player.index){
-          cars[index - 1].shapeColor = "red";
-          camera.position.x = displayWidth/2;
-          camera.position.y = cars[index-1].y
-        }
-       
-        //textSize(15);
-        //text(allPlayers[plr].name + ": " + allPlayers[plr].distance, 120,display_position)
-      }
-
-    }
-
-    if(keyIsDown(UP_ARROW) && player.index !== null){
-      player.distance +=10
-      player.update();
-    }
-
-    if(player.distance > 3860){
-      gameState = 2;
-    }
-
-    drawSprites();
-  }
-
-  end(){
-    console.log("game ended");
-    game.update(2);
-  }
+	if(player.distance === -5000){
+		gameState = 2;
+	}
+	
+	drawSprites();
+	}
+	
+	end(){
+		console.log("Game Ended");
+		var done = createElement('h1',"GAME ENDED");
+		done.position(displayWidth/2-140,displayHeight/4);
+		done.style('color',"black")
+	}
 }

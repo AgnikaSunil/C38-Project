@@ -14,15 +14,15 @@ class Form {
   }
 
   display(){
-    background(bg);
     this.title.html("HURDLES GAME");
     this.title.position(displayWidth/2-140, 0);
 
     this.input.position(displayWidth/2 - 90 , displayHeight/2 - 80);
     this.input.size(150,30);
-    this.button.position(displayWidth/2 - 50, displayHeight/2);
     this.input.style('background-color',"#FEF6E3");
     this.input.style('color',"#E9349F");
+
+    this.button.position(displayWidth/2 - 50, displayHeight/2);
     this.button.size(80,30);
     this.button.style('background-color',"#A916A5");
     this.button.style('color',"#E0F791");
